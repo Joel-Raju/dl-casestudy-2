@@ -1,9 +1,14 @@
 import streamlit as st
 from tensorflow.keras.models import load_model
 import numpy as np
+import os
+
+current_dir = os.getcwd()
+
+model_path = os.path.join(current_dir, "vae_best_model.keras")
 
 # Load the VAE model
-vae_model = load_model("vae_final_model.h5")
+vae_model = load_model(model_path)
 
 
 # Function to generate an image from the model
