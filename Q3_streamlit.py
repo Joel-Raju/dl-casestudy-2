@@ -132,12 +132,10 @@ class VAE(tf.keras.Model):
 
 current_dir = os.getcwd()
 
-model_path = os.path.join(
-    current_dir, "vae_best_model.keras", custom_objects={"VAE": VAE}
-)
+model_path = os.path.join(current_dir, "vae_best_model.keras")
 
 # Load the VAE model
-vae_model = load_model(model_path)
+vae_model = load_model(model_path, custom_objects={"VAE": VAE})
 
 
 # Function to generate an image from the model
