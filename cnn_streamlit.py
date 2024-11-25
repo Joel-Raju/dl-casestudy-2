@@ -63,4 +63,6 @@ if uploaded_file is not None:
     predicted_label = label_encoder.classes_[predicted_class]
 
     # Display the prediction
-    st.write(f"Prediction: {predicted_label}")
+
+    st.write(f"Predicted Class: **{predicted_class}**")
+    st.write(f"Confidence Scores: {prediction[0]}")
