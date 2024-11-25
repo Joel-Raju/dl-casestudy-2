@@ -7,6 +7,8 @@ from transformer_model_1 import (
     weighted_categorical_crossentropy,
     TransformerBlock,
 )
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
 current_dir = os.getcwd()
@@ -80,6 +82,8 @@ def handle_neutral_patterns(text):
 
 # Integrate into enhanced preprocessing function
 def enhanced_neutral_preprocess_text(text):
+    vocab_size = 20000
+    maxlen = 200
     # Basic cleanup
     text = re.sub(r"http\S+|www\S+", "", text)  # Remove URLs
     text = re.sub(r"[^A-Za-z0-9 ]+", "", text)  # Remove special characters
@@ -91,7 +95,15 @@ def enhanced_neutral_preprocess_text(text):
     # Handle specific neutral patterns and toned-down synonym replacements
     text = handle_neutral_patterns(text)
 
-    return text
+    tokenizer = Tokenizer(num_words=vocab_size, oov_token="<OOV>")
+
+    # Tokenize using the loaded tokenizer
+    sequence = tokenizer.texts_to_sequences([text])  # Note: input is a list of texts
+
+    # Pad the sequence
+    padded_sequence = pad_sequences(sequence, maxlen=maxlen, padding="post")
+
+    return padded_sequence
 
 
 # Streamlit app
