@@ -31,7 +31,7 @@ st.title("VAE Image Generator")
 
 # Slider for latent dimension input
 latent_dim = st.slider(
-    "Latent Dimension", min_value=32, max_value=128, value=64, step=32
+    "Latent Dimension", min_value=128, max_value=128, value=128, step=0
 )
 
 # Button to generate image
