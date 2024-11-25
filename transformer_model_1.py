@@ -1,8 +1,10 @@
 import tensorflow as tf
 from tensorflow.keras import layers
+from tensorflow.keras.saving import register_keras_serializable
 
 
 # Define the custom TokenAndPositionEmbedding layer
+@register_keras_serializable()
 class TokenAndPositionEmbedding(layers.Layer):
     def __init__(self, maxlen, vocab_size, embed_dim, **kwargs):
         super(TokenAndPositionEmbedding, self).__init__(**kwargs)
@@ -32,6 +34,7 @@ class TokenAndPositionEmbedding(layers.Layer):
 
 
 # Define the custom TransformerBlock layer
+@register_keras_serializable()
 class TransformerBlock(layers.Layer):
     def __init__(self, embed_dim, num_heads, ff_dim, rate=0.1, **kwargs):
         super(TransformerBlock, self).__init__(**kwargs)
