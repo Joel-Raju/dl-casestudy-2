@@ -1,48 +1,14 @@
 import tensorflow as tf
-from tensorflow import keras
 from tensorflow.keras import layers
 from tensorflow.keras.saving import register_keras_serializable
+from tensorflow.keras.utils import array_to_img
 
 
-latent_dim = 128
-
-discriminator = keras.Sequential(
-    [
-        keras.Input(shape=(64, 64, 3)),
-        layers.Conv2D(64, kernel_size=4, strides=2, padding="same"),
-        layers.LeakyReLU(0.2),
-        layers.Conv2D(128, kernel_size=4, strides=2, padding="same"),
-        layers.LeakyReLU(0.2),
-        layers.Conv2D(128, kernel_size=4, strides=2, padding="same"),
-        layers.LeakyReLU(0.2),
-        layers.Flatten(),
-        layers.Dropout(0.2),
-        layers.Dense(1, activation="sigmoid"),
-    ],
-    name="discriminator",
-)
-
-generator = keras.Sequential(
-    [
-        keras.Input(shape=(latent_dim,)),
-        layers.Dense(8 * 8 * 128),
-        layers.Reshape((8, 8, 128)),
-        layers.Conv2DTranspose(128, kernel_size=4, strides=2, padding="same"),
-        layers.LeakyReLU(0.2),
-        layers.Conv2DTranspose(256, kernel_size=4, strides=2, padding="same"),
-        layers.LeakyReLU(0.2),
-        layers.Conv2DTranspose(512, kernel_size=4, strides=2, padding="same"),
-        layers.LeakyReLU(0.2),
-        layers.Conv2D(3, kernel_size=5, padding="same", activation="sigmoid"),
-    ],
-    name="generator",
-)
-
-
-@register_keras_serializable()
-class GAN(keras.Model):
-    def __init__(self, discriminator, generator, latent_dim, **kwargs):
-        super(GAN, self).__init__(**kwargs)
+# Define the GAN class
+@register_keras_serializable(package="Custom")
+class GAN(tf.keras.Model):
+    def __init__(self, discriminator, generator, latent_dim):
+        super().__init__()
         self.discriminator = discriminator
         self.generator = generator
         self.latent_dim = latent_dim
@@ -52,35 +18,12 @@ class GAN(keras.Model):
         self.d_optimizer = d_optimizer
         self.g_optimizer = g_optimizer
         self.loss_fn = loss_fn
-        self.d_loss_metric = keras.metrics.Mean(name="d_loss")
-        self.g_loss_metric = keras.metrics.Mean(name="g_loss")
+        self.d_loss_metric = tf.keras.metrics.Mean(name="d_loss")
+        self.g_loss_metric = tf.keras.metrics.Mean(name="g_loss")
 
     @property
     def metrics(self):
         return [self.d_loss_metric, self.g_loss_metric]
-
-    def get_config(self):
-        # Return configuration for serialization
-        config = super(GAN, self).get_config()
-        config.update(
-            {
-                "discriminator": self.discriminator,
-                "generator": self.generator,
-                "latent_dim": self.latent_dim,
-            }
-        )
-        return config
-
-    @classmethod
-    def from_config(cls, config):
-        print("Config:------------", config)
-        # Create an instance from the serialized configuration
-        return cls(
-            discriminator=config["discriminator"],  # Extract discriminator
-            generator=config["generator"],  # Extract generator
-            latent_dim=config["latent_dim"],  # Extract latent_dim
-            **config  # Pass other config items
-        )
 
     def train_step(self, real_images):
         batch_size = tf.shape(real_images)[0]
@@ -111,3 +54,20 @@ class GAN(keras.Model):
             "d_loss": self.d_loss_metric.result(),
             "g_loss": self.g_loss_metric.result(),
         }
+
+    def get_config(self):
+        return {
+            "discriminator": tf.keras.utils.serialize_keras_object(self.discriminator),
+            "generator": tf.keras.utils.serialize_keras_object(self.generator),
+            "latent_dim": self.latent_dim,
+        }
+
+    @classmethod
+    def from_config(cls, config):
+        discriminator = tf.keras.utils.deserialize_keras_object(config["discriminator"])
+        generator = tf.keras.utils.deserialize_keras_object(config["generator"])
+        return cls(
+            discriminator=discriminator,
+            generator=generator,
+            latent_dim=config["latent_dim"],
+        )

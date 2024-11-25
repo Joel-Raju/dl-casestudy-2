@@ -1,7 +1,8 @@
+import os
 import streamlit as st
 import tensorflow as tf
-from tensorflow import keras
-import os
+from tensorflow.keras.models import load_model
+from tensorflow.keras.utils import array_to_img
 from Q1_DC_GAN_model import GAN
 
 
@@ -9,38 +10,37 @@ current_dir = os.getcwd()
 
 model_path = os.path.join(
     current_dir,
-    "Q1_DC_GAN.keras",
+    "q1_dcgan_model_final.keras",
 )
 
-# Load the trained GAN model
-gan = keras.models.load_model(model_path, custom_objects={"GAN": GAN})
+
+# Streamlit app title
+st.title("DCGAN Image Generator")
+st.write("Generate images using a pretrained DCGAN model.")
 
 
-# Define the Streamlit app
-def main():
-    st.title("GAN Image Generator")
-    st.sidebar.header("Settings")
-
-    # Number of images to generate
-    num_images = st.sidebar.slider("Number of Images", 1, 10, 3)
-
-    # Latent dimension size (should match your model)
-    latent_dim = 128  # Update if your model uses a different latent dim
-
-    if st.button("Generate Images"):
-        # Generate random latent vectors
-        random_latent_vectors = tf.random.normal(shape=(num_images, latent_dim))
-
-        # Generate images
-        generated_images = gan.generator(random_latent_vectors)
-        generated_images *= 255
-        generated_images.numpy()
-
-        # Display images
-        for i in range(num_images):
-            img = keras.utils.array_to_img(generated_images[i])
-            st.image(img, caption=f"Generated Image {i+1}", use_column_width=True)
+# Load the GAN model
+@st.cache_resource  # Cache the loaded model for faster inference
+def load_gan_model(path):
+    return load_model(path, custom_objects={"GAN": GAN})
 
 
-if __name__ == "__main__":
-    main()
+gan = load_gan_model(model_path)
+latent_dim = 128
+
+# Slider to choose the number of images to generate
+num_images = st.slider("Select number of images to generate:", 1, 10, 5)
+
+# Button to trigger image generation
+if st.button("Generate Images"):
+    # Generate random latent vectors
+    random_latent_vectors = tf.random.normal(shape=(num_images, latent_dim))
+
+    # Generate fake images using the generator
+    generated_images = gan.generator(random_latent_vectors)
+    generated_images = (generated_images * 255).numpy().astype("uint8")  # Denormalize
+
+    # Display the generated images
+    st.write("Generated Images:")
+    for i in range(num_images):
+        st.image(array_to_img(generated_images[i]), caption=f"Image {i + 1}")
