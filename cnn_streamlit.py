@@ -64,5 +64,5 @@ if uploaded_file is not None:
 
     # Display the prediction
 
-    st.write(f"Predicted Class: **{predicted_class}**")
+    st.write(f"Predicted Class: **{predicted_label}**")
     st.write(f"Confidence Scores: {prediction[0]}")
