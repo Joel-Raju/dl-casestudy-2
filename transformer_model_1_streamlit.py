@@ -96,6 +96,7 @@ def enhanced_neutral_preprocess_text(text):
     text = handle_neutral_patterns(text)
 
     tokenizer = Tokenizer(num_words=vocab_size, oov_token="<OOV>")
+    tokenizer.fit_on_texts([text])  # Fit tokenizer on the current text
 
     # Tokenize using the loaded tokenizer
     sequence = tokenizer.texts_to_sequences([text])  # Note: input is a list of texts
@@ -107,10 +108,10 @@ def enhanced_neutral_preprocess_text(text):
 
 
 # Streamlit app
-st.title("Transformer Model Tester")
+st.title("Review sentiment - Transformer Model")
 
 # Text input
-text = st.text_area("Enter text:", "Example text")
+text = st.text_area("Enter the review text:", "")
 
 # Predict button
 if st.button("Predict"):
