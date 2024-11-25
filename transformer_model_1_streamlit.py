@@ -2,7 +2,6 @@ import streamlit as st
 import tensorflow as tf
 import os
 import re
-from tensorflow.keras import layers
 from transformer_model_1 import (
     TokenAndPositionEmbedding,
     weighted_categorical_crossentropy,
