@@ -27,6 +27,13 @@ loaded_model = tf.keras.models.load_model(
 )
 
 
+# Streamlit app
+st.title("Transformer Model Tester")
+
+# Text input
+text = st.text_area("Enter text:", "Example text")
+
+
 # Preprocessing function
 def preprocess_text(text):
     # Lowercase the text
